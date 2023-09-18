@@ -1,0 +1,107 @@
+html {
+  background-color: #9D9D9D;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #414141;
+  width: 1080px;
+  margin: 0 auto;/*外距，控制物件與周圍物件之間的距離*/
+  padding: 50px 0px 100px 0px;/*內距，物件邊框(border)內與資料之間的留白空間*/
+  border: 3px solid #ffffff;
+  display: flex;/*讓內容水平垂直置中*/
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/*hide scrollbar*/
+html {
+  overflow: -moz-hidden-unscrollable;
+  height: 100%;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  overflow: auto;
+}
+
+
+h1 {
+  color: #ffffff;
+  margin: 0;
+  padding: 20px 0;
+}
+
+h3 {
+  color: #b2b2b2;
+  margin: 0;
+  padding: 20px 0;
+}
+
+h2 {
+  color: #7700ff;
+  margin: 0;
+  padding: 20px 0;
+}
+
+h4 {
+  color: #e10381;
+  margin: 0;
+  padding: 20px 0;
+}
+
+h5 {
+  color: #00a0e5;
+  margin: 0;
+  padding: 20px 0;
+}
+
+h6 {
+  color: #31f600;
+  margin: 0;
+  padding: 20px 0;
+}
+
+.icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 100px;
+  background-color: #696969;
+  z-index: 48763;
+  position: fixed;
+  bottom: -100px;/* 初始位置在畫面下方 */
+  right: 20px;
+  transition: bottom 0.5s ease;/* 過渡效果 */
+}
+
+.box {
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 640px;
+  height: 160px;
+  margin: 10px;
+  border-radius: 10px;
+  box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.3);
+  transform: translateX(-666%);/*向右移動666%，預設為0*/
+  transition: transform 1s ease;
+  background-color: #3498db;
+}
+
+.box.show {
+  transform: translateX(0);
+}
+
+img {
+  display: block;
+  margin: 0 auto;
+}
