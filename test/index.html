@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* 定義頁面的基本樣式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            transition: background-color 1s;
+        }
+        /* 定義標題的樣式 */
+        h1 {
+            color: #333;
+            text-align: center;
+            animation: fadein 2s;
+        }
+        /* 定義標題的淡入動畫 */
+        @keyframes fadein {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        /* 定義按鈕的樣式 */
+        .myButton {
+            display: block;
+            width: 200px;
+            height: 50px;
+            margin: 10px auto;
+            background-color: #ff6347;
+            text-align: center;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            line-height: 50px;
+            cursor: pointer;
+            animation: colorchange 5s infinite;
+        }
+        /* 定義按鈕的顏色變化動畫 */
+        @keyframes colorchange {
+            0%   {background: red; color: white;}
+            25%  {background: yellow; color: black;}
+            50%  {background: blue; color: white;}
+            75%  {background: green; color: white;}
+            100% {background: red; color: white;}
+        }
+    </style>
+</head>
+<body>
+    <h1 id="myText">歡迎來到我的網頁！</h1>
+    <div class="myButton" onclick="changeColor()">點我改變背景顏色</div>
+    <div class="myButton" onclick="changeText()">點我改變標題文字</div>
+    <div class="myButton" onclick="changeLanguage()">點我改變語言</div>
+    <div class="myButton" onclick="toggleMusic()">點我播放/暫停音樂</div>
+    <!-- 音量控制滑塊 -->
+    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" onchange="adjustVolume()" style="width: 200px;">    
+    <div class="myButton" onclick="changeFont()">點我改變字體</div>
+    <div class="myButton" onclick="showDateTime()">點我顯示日期和時間</div>
+    <audio id="myAudio" src="Darktown_Strutters_Ball_Silent_Partner.mp3" preload="auto"></audio>
+
+    <script>
+        /* 定義改變背景顏色和文字顏色的函數 */
+        function changeColor() {
+            var newColor = "#"+((1<<24)*Math.random()|0).toString(16);
+            var newTextColor = "#"+((1<<24)*Math.random()|0).toString(16);
+            while (newColor === newTextColor) {
+                newTextColor = "#"+((1<<24)*Math.random()|0).toString(16);
+            }
+            document.body.style.backgroundColor = newColor;
+            document.getElementById("myText").style.color = newTextColor;
+            document.getElementById("myText").style.fontSize = Math.floor(Math.random() * 50) + 20 + "px";
+        }
+        /* 定義改變標題文字的函數 */
+        function changeText() {
+            var newText = ["歡迎來到我的網頁！", "你好，世界！", "這是一個美好的一天！", "希望你有個好心情！"];
+            document.getElementById("myText").innerText = newText[Math.floor(Math.random() * newText.length)];
+        }
+        /* 定義改變頁面語言的函數 */
+        function changeLanguage() {
+            var newLanguage = ["歡迎來到我的網頁！", "Welcome to my website!", "¡Bienvenido a mi sitio web!", "Willkommen auf meiner Website!"];
+            document.getElementById("myText").innerText = newLanguage[Math.floor(Math.random() * newLanguage.length)];
+        }
+        /* 定義播放和暫停音樂的函數 */
+        function toggleMusic() {
+            var myAudio = document.getElementById("myAudio");
+            if (myAudio.paused) {
+                myAudio.play();
+            } else {
+                myAudio.pause();
+            }
+        }
+        /* 定義調整音量的函數 */
+        function adjustVolume() {
+            var myAudio = document.getElementById("myAudio");
+            var volumeSlider = document.getElementById("volumeSlider");
+            myAudio.volume = volumeSlider.value;
+        }
+        /* 定義改變字體的函數 */
+        function changeFont() {
+            var newFont = ["Arial", "Verdana", "Helvetica", "Tahoma", "Trebuchet MS", "Times New Roman", "Georgia", "Garamond", "Courier New", "Brush Script MT"];
+            document.body.style.fontFamily = newFont[Math.floor(Math.random() * newFont.length)];
+        }
+        /* 定義顯示日期和時間的函數 */
+        function showDateTime() {
+            var currentdate = new Date(); 
+            var datetime = "現在的日期和時間是: " + currentdate.getDate() + "/"
+                + (currentdate.getMonth()+1)  + "/" 
+                + currentdate.getFullYear() + " @ "  
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds();
+            alert(datetime);
+        }
+    </script>
+</body>
+</html>
