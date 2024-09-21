@@ -42,9 +42,9 @@ a{
 a:link{
   color:#00ccff;
 }
-/*a:visited {
-  color:#c300cd;
-}*/
+a:visited {
+  color:#00ccff;
+}
 a:hover {
   text-decoration:underline;
   background-color:#fafafa;
