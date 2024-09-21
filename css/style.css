@@ -8,6 +8,7 @@ html {
 
 body {
   font-family: "Helvetica", "Arial","Consolas","微軟正黑體", sans-serif;
+  color: #ffffff;
   background-color: #2e2929;
   width: auto;
   margin: 0 auto;/*外距，控制物件與周圍物件之間的距離*/
@@ -34,9 +35,37 @@ body {
   overflow: auto;
 }
 
+/*去除掉連結的下劃線*/
+/*a{text-decoration:none;}*/
+a:link{
+/*設定還沒有瀏覽過的連結*/
+color:#00ccff;
+}
+a:visited {
+/*設定已經瀏覽過的連結*/
+color:#c300cd;
+}
+a:hover {
+/*設定滑鼠移經的連結*/
+text-decoration:underline;
+background-color:#fafafa;
+color:#808080;
+}
+a:active {
+/*設定正在點選的連結*/
+text-decoration:none;
+background-color:#808080;
+color:#fafafa;
+}
 
 h1 {
   color: #ffffff;
+  margin: 0;
+  padding: 20px 0;
+}
+h2 {
+  color: #ffffff;
+  text-align: center;
   margin: 0;
   padding: 20px 0;
 }
@@ -47,11 +76,6 @@ h3 {
   padding: 20px 0;
 }
 
-h2 {
-  color: #ffffff;
-  margin: 0;
-  padding: 20px 0;
-}
 
 h4 {
   color: #ffffff;
