@@ -104,7 +104,7 @@ h2 {
   box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.3);
   transform: translateX(-666%);/*向右移動666%，預設為0*/
   transition: transform 1.2s ease;
-  background-color: #164b6e;
+  background-color: #1c4e6f92;
 }
 
 .box.show {
