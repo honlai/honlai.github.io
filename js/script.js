@@ -10,7 +10,7 @@ function checkBoxes() {
   console.log(window.innerHeight);
   boxes.forEach((box) => {
     let boxTop = box.getBoundingClientRect().top;
-    if (boxTop < window.innerHeight*1.25) {
+    if (boxTop < window.innerHeight) {
       box.classList.add("show");
     } else {
       box.classList.remove("show");
