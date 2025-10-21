@@ -1,5 +1,5 @@
 html {
-  background-color: #2e2929;
+    background-color: #1a1a1a;
 }
 
 * {
@@ -7,18 +7,22 @@ html {
 }
 
 body {
-  font-family: "Helvetica", "Arial","Consolas","微軟正黑體", sans-serif;
-  color: #ffffff;
-  background-color: #333333;
-  width: auto;
-  margin: 0 auto;/*外距，控制物件與周圍物件之間的距離*/
-  padding: 50px 0px 50px 0px;/*內距，物件邊框(border)內與資料之間的留白空間*/
-  border: 3px solid #ffffff;
-  display: flex;/*讓內容水平垂直置中*/
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  overflow-x: hidden;
+    font-family: "Helvetica", "Arial","Consolas","微軟正黑體", sans-serif;
+    color: #f0f0f0; /* 將純白文字改為柔和的淺灰，減輕眼睛壓力 */
+    background-color: #1f1f1f; /* 內容區的背景略微比 html 亮一點，產生層次感 */
+    width: 90%; /* 寬度稍微固定一點，但仍保持彈性 */
+    max-width: 1000px; /* 設定最大寬度，避免在超寬螢幕上拉伸 */
+    margin: 40px auto;
+    padding: 30px 20px;
+    border: 1px solid #333; /* 將厚重的白邊框改為細微的深色邊框 */
+    border-radius: 10px; /* 增加圓角 */
+    /* 移除 display: flex 的全頁置中，讓內容自然垂直堆疊 */
+    /* display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; */
+    
+    /* 保持文字和區塊居中，將 margin: 0 auto; 應用於區塊內部，而不是 body */
 }
 
 /*hide scrollbar*/
@@ -31,8 +35,11 @@ body::-webkit-scrollbar {
   display: none;
 }
 
-body {
-  overflow: auto;
+/* 確保 body 內的內容可以橫向填滿 */
+body > * {
+    width: 100%;
+    max-width: 860px; /* 內容區最大寬度 */
+    margin: 0 auto;
 }
 
 
@@ -58,19 +65,29 @@ a:active {
 hr {
   width:86%
 }
-h1,h3,h4,h5,h6 {
+h1 {
+    color: #00bfff; /* 科技感藍色作為主色 (例如 #00bfff, 亮青藍) */
+    font-size: 2.5em;
+    border-bottom: 2px solid #00bfff; /* 標題下畫線 */
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    width: 100%; /* 讓標題填滿 max-width 區域 */
+}
+h3,h4,h5,h6 {
   color: #ffffff;
   margin: 0;
   padding: 20px 0;
 }
 h2 {
-  color: #ffffff;
-  text-align: center;
-  margin: 0;
-  padding: 20px 0;
+    color: #f0f0f0;
+    text-align: left; /* 讓 H2 標題靠左對齊，更像正式文件 */
+    padding: 15px 0 10px 0;
+    font-size: 1.6em;
 }
 li {
-  font-size:0.5cm;
+    font-size: 1em; /* 恢復正常字體大小，0.5cm 對於不同設備可能過大 */
+    margin-bottom: 10px; /* 增加列表項間距 */
 }
 .education-section {
   margin-bottom: 20px;
@@ -98,25 +115,53 @@ li {
 }
 
 .box {
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 90%;
-  margin: 10px;
-  padding: 5% 5% 5% 5%;
-  border-radius: 10px;
-  box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.3);
-  transform: translateX(-200%);
-  transition: transform 1.2s ease;
-  background-color: #1c4e6f92;
+    color: #f0f0f0;
+    display: block;
+    width: 100%;
+    margin: 20px auto;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+    
+    background-color: #2a2a2a;
+
+    transform: translateY(50px);
+    opacity: 0;
+    transition: transform 0.8s ease-out, opacity 0.8s ease-out; /* 同時過渡移動和透明度 */
 }
 
 .box.show {
-  transform: translateX(0);
+    transform: translateY(0);
+    opacity: 1;
 }
 
 img {
   display: block;
   margin: 0 auto;
+}
+
+.project-section b p {
+    color: #00bfff; /* 項目名稱使用主色調 */
+    font-size: 1.1em;
+    margin-bottom: 5px;
+}
+.description{
+    color: #aaaaaa; /* 描述文字使用淺灰色，與主文本區分 */
+    margin-top: 5px;
+}
+.details {
+    /* 讓地點/時間與學位/項目名稱並列，保持間距 */
+    margin-left: 0;
+    margin-top: 5px;
+    color: #dddddd;
+}
+/* ---- particles.js container ---- */
+
+#particles-js{
+  width: 100%;
+  height: 100%;
+  background-color: #2c2e43;
+  background-size: cover;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
 }
