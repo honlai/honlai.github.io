@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown 測試</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <textarea id="markdown-input" rows="10" cols="50"># 這是一篇 Markdown 文章
+
+這裡是 **粗體** 和 *斜體* 文字。
+
+- 列表 1
+- 列表 2
+- 列表 3
+    </textarea>
+
+    <button onclick="convertMarkdown()">轉換</button>
+    <div id="output"></div>
+
+    <script>
+        function convertMarkdown() {
+            let markdownText = document.getElementById("markdown-input").value;
+            let htmlContent = marked.parse(markdownText);
+            document.getElementById("output").innerHTML = htmlContent;
+        }
+    </script>
+</body>
+</html>
