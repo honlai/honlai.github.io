@@ -13,7 +13,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #0a0e27;
+            background-color: transparent;
             transition: background-color 0.5s, color 0.5s;
             width: 100%;
             overflow-x: hidden;
@@ -40,7 +40,7 @@
 
         /* 深色模式樣式 */
         body.dark-mode {
-            background-color: #000000;
+            background-color: transparent;
             color: #ffffff;
         }
         
@@ -250,7 +250,20 @@
             z-index: 1000;
             display: none;
         }
-        
+        /* 黑洞狀態的樣式 */
+        #blackHoleStats {
+            position: fixed;
+            top: 70px; /* 放在主題切換按鈕的下方 */
+            left: 20px;
+            font-size: 16px; /* 稍微小一點 */
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            z-index: 1000;
+            line-height: 1.4; /* 讓兩行之間有點間距 */
+        }
         /* 主題切換按鈕樣式 */
         .theme-toggle {
             position: fixed;
@@ -296,10 +309,13 @@
     <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     
     <div id="gameScore">分數: <span id="score">0</span> | 時間: <span id="timer">30</span>s</div>
-
+    <div id="blackHoleStats">
+        <div>Black Hole Size: <span id="bhSize">0</span></div>
+        <div>Particles Absorbed: <span id="bhAbsorbed">0</span></div>
+    </div>
     <h1 id="myText">歡迎來到我的網頁！</h1>
-    <div class="myButton" onclick="changeColor()">點我改變背景顏色</div>
-    <div class="myButton" onclick="changeText()">點我改變標題文字</div>
+    <div class="myButton" onclick="changeColor()">點我改變標題文字</div>
+    <div class="myButton" onclick="changeText()">點我改變標題</div>
     <div class="myButton" onclick="changeLanguage()">點我改變語言</div>
     <div class="myButton" onclick="toggleMusic()">點我播放/暫停音樂</div>
     <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5" onchange="adjustVolume()" style="width: 200px;">      
@@ -324,15 +340,22 @@
         // 初始化音量
         document.getElementById("myAudio").volume = 0.5;
         
+        // NEW: 全域變數來儲存 tsparticles 實例
+        let tsParticlesContainer = null;
+        let particlesAbsorbed = 0;
         // 黑洞設定
         const blackHole = document.getElementById('blackHole');
         let blackHoleX = window.innerWidth / 2;
         let blackHoleY = window.innerHeight / 2;
-        const blackHoleRadius = 30; // 黑洞半徑
-        const attractionRadius = 200; // 吸引範圍
+        let blackHoleRadius = 30; // 黑洞半徑 (改為 let)
+        let attractionRadius = 200; // 吸引範圍 (改為 let)
+        
+        // !! NEW: 新增成長控制變數 !!
+        const growthFactor = 0.2; // 每次吸收增加 0.2px 的半徑
+        const maxBlackHoleRadius = 250; // 黑洞的最大半徑
         
         // 黑洞漂浮動畫變數
-        let blackHoleVelocityX = 0.63;
+        let blackHoleVelocityX = 0.64;
         let blackHoleVelocityY = 0.42;
         let isBlackHoleFloating = true;
         
@@ -342,7 +365,7 @@
         // 設置黑洞初始位置
         blackHole.style.left = blackHoleX - blackHoleRadius + 'px';
         blackHole.style.top = blackHoleY - blackHoleRadius + 'px';
-        
+        updateStatsDisplay();
         // 黑洞漂浮動畫
         function floatBlackHole() {
             if (!isDraggingBlackHole && isBlackHoleFloating) {
@@ -368,10 +391,29 @@
             
             requestAnimationFrame(floatBlackHole);
         }
-        
+        function updateBlackHoleSize() {
+            // 只有當黑洞小於最大值時才執行
+            if (blackHoleRadius >= maxBlackHoleRadius) return;
+
+            let diameter = blackHoleRadius * 2;
+            
+            // 讓陰影也跟著變大 (初始 30px 半徑 -> 10px 陰影)
+            let shadowSpread = blackHoleRadius / 3; 
+
+            blackHole.style.width = diameter + 'px';
+            blackHole.style.height = diameter + 'px';
+            blackHole.style.borderRadius = blackHoleRadius + 'px';
+            
+            // 動態更新 CSS 的 box-shadow
+            blackHole.style.boxShadow = `0 0 10px ${shadowSpread}px rgba(0,0,0,0.5), inset 0 0 10px ${shadowSpread}px rgba(0,0,0,0.5)`;
+        }
         // 開始漂浮動畫
         floatBlackHole();
-        
+        function updateStatsDisplay() {
+            // .toFixed(1) 會顯示小數點後一位 (例如 30.2)
+            document.getElementById('bhSize').textContent = blackHoleRadius.toFixed(1);
+            document.getElementById('bhAbsorbed').textContent = particlesAbsorbed;
+        }
         blackHole.addEventListener('mousedown', (e) => {
             isDraggingBlackHole = true;
             e.stopPropagation();
@@ -493,6 +535,16 @@
                         requestAnimationFrame(animate);
                     } else {
                         trail.remove();
+                        particlesAbsorbed++;
+                        if (blackHoleRadius < maxBlackHoleRadius) {
+                            blackHoleRadius += growthFactor; // 增加半徑
+                            
+                            // 保持比例放大吸引範圍 (200 / 30 ≈ 6.6)
+                            attractionRadius += (growthFactor * 6.6); 
+                            updateStatsDisplay();
+                            // 呼叫輔助函數來更新 CSS
+                            updateBlackHoleSize(); 
+                        }
                     }
                 };
                 
@@ -509,7 +561,20 @@
         function toggleTheme() {
             document.body.classList.toggle('dark-mode');
             const btn = document.querySelector('.theme-toggle');
-            btn.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            
+            // NEW: 更新 tsparticles 的背景顏色
+            if (tsParticlesContainer) {
+                const newBgColor = isDarkMode ? "#000000" : "#0a0e27";
+                
+                // 更新設定值
+                tsParticlesContainer.options.background.color.value = newBgColor;
+                
+                // 刷新畫布以套用變更
+                tsParticlesContainer.refresh();
+            }
+            
+            btn.textContent = isDarkMode ? '☀️' : '🌙';
         }
         
         // Emoji 雨
@@ -686,7 +751,7 @@
         tsParticles.load("tsparticles", {
             background: {
                 color: {
-                    value: "transparent"
+                    value: "#0a0e27"
                 }
             },
             fpsLimit: 60,
@@ -725,6 +790,9 @@
                 }
             },
             detectRetina: true
+        })
+        .then(container => {
+            tsParticlesContainer = container;
         });
     </script>
 </body>
