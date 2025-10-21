@@ -1,31 +1,113 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <style>
         /* 定義頁面的基本樣式 */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 20px 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-            transition: background-color 1s;
+            min-height: 100vh;
+            background-color: #0a0e27;
+            transition: background-color 0.5s, color 0.5s;
+            width: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
+        
+        /* tsparticles 畫布 (底層) */
+        #tsparticles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0; /* 最底層背景 */
+        }
+        
+        /* * NEW: 確保所有主要內容都在滑鼠軌跡之上 
+         * (z-index 必須搭配 position:relative 才有效)
+        */
+        h1, .myButton, input[type="range"], #drawingCanvas, .color-picker-container, h3 {
+            position: relative;
+            z-index: 5;
+        }
+
+        /* 深色模式樣式 */
+        body.dark-mode {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        
+        body.dark-mode h1 {
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        body.dark-mode .myButton {
+            background-color: #2d2d2d;
+            color: #ffffff;
+            border: 1px solid #444;
+        }
+        
+        body.dark-mode #drawingCanvas {
+            background-color: #2d2d2d;
+            border-color: #444;
+        }
+
         /* 定義標題的樣式 */
         h1 {
-            color: #333;
+            color: #ffffff;
             text-align: center;
             animation: fadein 2s;
+            margin: 20px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
+        
+        /* 文字效果樣式 */
+        h1.wave-effect {
+            animation: wave 1s ease-in-out infinite;
+        }
+        
+        h1.bounce-effect {
+            animation: bounce 0.6s ease infinite;
+        }
+        
+        h1.glitch-effect {
+            animation: glitch 0.3s infinite;
+        }
+        
+        @keyframes wave {
+            0%, 100% { transform: translateY(0); }
+            25% { transform: translateY(-10px); }
+            75% { transform: translateY(10px); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        
         /* 定義標題的淡入動畫 */
         @keyframes fadein {
             from { opacity: 0; }
             to   { opacity: 1; }
         }
+        
         /* 定義按鈕的樣式 */
         .myButton {
             display: block;
@@ -40,7 +122,9 @@
             line-height: 50px;
             cursor: pointer;
             animation: colorchange 5s infinite;
+            border: none;
         }
+        
         /* 定義按鈕的顏色變化動畫 */
         @keyframes colorchange {
             0%   {background: red; color: white;}
@@ -49,21 +133,491 @@
             75%  {background: green; color: white;}
             100% {background: red; color: white;}
         }
+        
+        /* Emoji 雨的樣式 */
+        .emoji-rain {
+            position: fixed;
+            font-size: 30px;
+            animation: fall linear;
+            z-index: 4; /* 原本是 3，提升到 4 */
+            pointer-events: none;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+        
+        /* * NEW: 滑鼠軌跡的樣式 
+        */
+        .cursor-trail {
+            position: fixed; /* 使用 fixed 確保它在視窗中定位 */
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            z-index: 3; /* 原本是 2，提升到 3 */
+            pointer-events: none; /* 關鍵！讓滑鼠可以點擊穿透它 */
+            animation: fadeOutTrail 0.5s linear forwards;
+            /* 讓它從中心點定位 */
+            transform: translate(-50%, -50%); 
+        }
+
+        /* NEW: 軌跡消失的動畫 */
+        @keyframes fadeOutTrail {
+            from {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5); /* 消失時縮小 */
+            }
+        }
+
+        /* 黑洞樣式 */
+        #blackHole {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #000000 0%, #1a1a1a 50%, #333333 100%);
+            box-shadow: 0 0 30px 10px rgba(0, 0, 0, 0.8),
+                        0 0 60px 20px rgba(0, 0, 0, 0.5),
+                        inset 0 0 20px rgba(0, 0, 0, 1);
+            z-index: 2; /* 原本是 1，提升到 2 */
+            cursor: move;
+            animation: blackHolePulse 2s ease-in-out infinite;
+            border: 2px solid #444;
+        }
+
+        @keyframes blackHolePulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 30px 10px rgba(0, 0, 0, 0.8),
+                            0 0 60px 20px rgba(0, 0, 0, 0.5),
+                            inset 0 0 20px rgba(0, 0, 0, 1);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 40px 15px rgba(0, 0, 0, 0.9),
+                            0 0 80px 30px rgba(0, 0, 0, 0.6),
+                            inset 0 0 25px rgba(0, 0, 0, 1);
+            }
+        }
+
+        /* 繪圖畫布樣式 */
+        #drawingCanvas {
+            border: 2px solid #333;
+            cursor: crosshair;
+            background-color: white;
+            margin: 10px;
+        }
+        
+        /* 遊戲目標樣式 */
+        .game-target {
+            position: fixed;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #ff6347, #ff0000);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 999;
+            animation: pulse 0.5s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 0 20px rgba(255, 99, 71, 0.8);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* 遊戲分數顯示 */
+        #gameScore {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        /* 主題切換按鈕樣式 */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        /* 顏色選擇器容器 */
+        .color-picker-container {
+            margin: 10px;
+        }
+        
+        #colorPicker {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    
+    <!-- tsparticles 星空背景 -->
+    <div id="tsparticles"></div>
+    
+    <!-- 黑洞元素 -->
+    <div id="blackHole"></div>
+    
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    
+    <div id="gameScore">分數: <span id="score">0</span> | 時間: <span id="timer">30</span>s</div>
+
     <h1 id="myText">歡迎來到我的網頁！</h1>
     <div class="myButton" onclick="changeColor()">點我改變背景顏色</div>
     <div class="myButton" onclick="changeText()">點我改變標題文字</div>
     <div class="myButton" onclick="changeLanguage()">點我改變語言</div>
     <div class="myButton" onclick="toggleMusic()">點我播放/暫停音樂</div>
-    <!-- 音量控制滑塊 -->
-    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" onchange="adjustVolume()" style="width: 200px;">    
+    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5" onchange="adjustVolume()" style="width: 200px;">      
     <div class="myButton" onclick="changeFont()">點我改變字體</div>
     <div class="myButton" onclick="showDateTime()">點我顯示日期和時間</div>
+    <div class="myButton" onclick="triggerEmojiRain()">🎉 點我下 Emoji 雨！</div>
+    <div class="myButton" onclick="cycleTextEffect()">✨ 點我切換文字特效</div>
+    <div class="myButton" onclick="takeScreenshot()">📸 點我截圖下載</div>
+    <div class="myButton" onclick="startGame()">🎮 開始打地鼠遊戲！</div>
+    
+    <h3 style="margin-top: 20px;">✏️ 繪圖區</h3>
+    <canvas id="drawingCanvas" width="400" height="300"></canvas>
+    <div class="color-picker-container">
+        <label style="font-weight: bold;">畫筆顏色: </label>
+        <input type="color" id="colorPicker" value="#000000">
+        <button class="myButton" onclick="clearCanvas()" style="display: inline-block; width: 120px; margin-left: 10px;">清除畫布</button>
+    </div>
+    
     <audio id="myAudio" src="Darktown_Strutters_Ball_Silent_Partner.mp3" preload="auto"></audio>
 
     <script>
+        // 初始化音量
+        document.getElementById("myAudio").volume = 0.5;
+        
+        // 黑洞設定
+        const blackHole = document.getElementById('blackHole');
+        let blackHoleX = window.innerWidth / 2;
+        let blackHoleY = window.innerHeight / 2;
+        const blackHoleRadius = 30; // 黑洞半徑
+        const attractionRadius = 200; // 吸引範圍
+        
+        // 黑洞漂浮動畫變數
+        let blackHoleVelocityX = 0.63;
+        let blackHoleVelocityY = 0.42;
+        let isBlackHoleFloating = true;
+        
+        // 讓黑洞可以拖動 - 必須在 floatBlackHole() 函數之前初始化！
+        let isDraggingBlackHole = false;
+        
+        // 設置黑洞初始位置
+        blackHole.style.left = blackHoleX - blackHoleRadius + 'px';
+        blackHole.style.top = blackHoleY - blackHoleRadius + 'px';
+        
+        // 黑洞漂浮動畫
+        function floatBlackHole() {
+            if (!isDraggingBlackHole && isBlackHoleFloating) {
+                // 更新位置
+                blackHoleX += blackHoleVelocityX;
+                blackHoleY += blackHoleVelocityY;
+                
+                // 檢查邊界並反彈
+                if (blackHoleX - blackHoleRadius <= 0 || blackHoleX + blackHoleRadius >= window.innerWidth) {
+                    blackHoleVelocityX *= -1;
+                    blackHoleX = Math.max(blackHoleRadius, Math.min(window.innerWidth - blackHoleRadius, blackHoleX));
+                }
+                
+                if (blackHoleY - blackHoleRadius <= 0 || blackHoleY + blackHoleRadius >= window.innerHeight) {
+                    blackHoleVelocityY *= -1;
+                    blackHoleY = Math.max(blackHoleRadius, Math.min(window.innerHeight - blackHoleRadius, blackHoleY));
+                }
+                
+                // 更新黑洞位置
+                blackHole.style.left = blackHoleX - blackHoleRadius + 'px';
+                blackHole.style.top = blackHoleY - blackHoleRadius + 'px';
+            }
+            
+            requestAnimationFrame(floatBlackHole);
+        }
+        
+        // 開始漂浮動畫
+        floatBlackHole();
+        
+        blackHole.addEventListener('mousedown', (e) => {
+            isDraggingBlackHole = true;
+            e.stopPropagation();
+        });
+        
+        window.addEventListener('mousemove', (e) => {
+            if (isDraggingBlackHole) {
+                blackHoleX = e.clientX;
+                blackHoleY = e.clientY;
+                blackHole.style.left = blackHoleX - blackHoleRadius + 'px';
+                blackHole.style.top = blackHoleY - blackHoleRadius + 'px';
+            }
+        });
+        
+        window.addEventListener('mouseup', () => {
+            isDraggingBlackHole = false;
+        });
+        
+        // 繪圖畫布設定
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            ctx.strokeStyle = document.getElementById('colorPicker').value;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        });
+
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+        canvas.addEventListener('mouseout', () => isDrawing = false);
+        
+        // 清除畫布
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        /* * NEW: 滑鼠軌跡功能 
+        */
+        let canCreateTrail = true;
+        // 監聽 'mousemove' 事件
+        window.addEventListener('mousemove', (e) => {
+            if (canCreateTrail) {
+                canCreateTrail = false;
+                // 呼叫輔助函數來創建粒子
+                createTrail(e.clientX, e.clientY);
+                // 設置一個 50ms 的冷卻時間，防止粒子過於密集
+                setTimeout(() => {
+                    canCreateTrail = true;
+                }, 50); 
+            }
+        });
+
+        // NEW: 創建軌跡粒子的輔助函數（帶黑洞吸引效果）
+        function createTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            
+            // 設置初始位置
+            let posX = x;
+            let posY = y;
+            trail.style.left = posX + 'px';
+            trail.style.top = posY + 'px';
+            
+            // 隨機一個顏色
+            const randomColor = '#' + ((1<<24)*Math.random()|0).toString(16);
+            trail.style.backgroundColor = randomColor;
+            
+            // 加入到 body
+            document.body.appendChild(trail);
+            
+            // 計算到黑洞的距離
+            const dx = blackHoleX - posX;
+            const dy = blackHoleY - posY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // 如果在吸引範圍內，啟動吸引動畫
+            if (distance < attractionRadius) {
+                // 移除原本的淡出動畫
+                trail.style.animation = 'none';
+                
+                // 計算吸引時間（越近越快被吸入）
+                const attractTime = Math.max(200, (distance / attractionRadius) * 500);
+                
+                // 使用動畫吸引到黑洞
+                const startTime = Date.now();
+                const animate = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / attractTime, 1);
+                    
+                    // 使用緩動函數（加速效果）
+                    const easeProgress = progress * progress;
+                    
+                    // 計算新位置
+                    const currentX = posX + dx * easeProgress;
+                    const currentY = posY + dy * easeProgress;
+                    
+                    trail.style.left = currentX + 'px';
+                    trail.style.top = currentY + 'px';
+                    
+                    // 縮小並降低透明度
+                    trail.style.opacity = 1 - easeProgress;
+                    trail.style.transform = `translate(-50%, -50%) scale(${1 - easeProgress * 0.8})`;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        trail.remove();
+                    }
+                };
+                
+                requestAnimationFrame(animate);
+            } else {
+                // 不在吸引範圍內，正常消失
+                setTimeout(() => {
+                    trail.remove();
+                }, 500);
+            }
+        }
+        
+        // 主題切換
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.querySelector('.theme-toggle');
+            btn.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        }
+        
+        // Emoji 雨
+        function triggerEmojiRain() {
+            const emojis = ['🎉', '🎊', '🌟', '⭐', '✨', '💫', '🎈', '🎁', '🍰', '🎂', '🌈', '🦄'];
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.className = 'emoji-rain';
+                    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    emoji.style.left = Math.random() * 100 + '%';
+                    emoji.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(emoji);
+                    
+                    setTimeout(() => emoji.remove(), 4000);
+                }, i * 100);
+            }
+        }
+        
+        // 文字特效循環
+        let currentEffect = 0;
+        const effects = ['', 'wave-effect', 'bounce-effect', 'glitch-effect'];
+        const effectNames = ['無特效', '波浪', '彈跳', '故障'];
+        
+        function cycleTextEffect() {
+            const text = document.getElementById('myText');
+            text.className = '';
+            currentEffect = (currentEffect + 1) % effects.length;
+            if (effects[currentEffect]) {
+                text.classList.add(effects[currentEffect]);
+            }
+            alert('已切換到: ' + effectNames[currentEffect] + ' 特效！');
+        }
+        
+        // 截圖功能
+        function takeScreenshot() {
+            alert('截圖功能提示:\n\n1. 在 Windows 上: 按 Win + Shift + S\n2. 在 Mac 上: 按 Cmd + Shift + 4\n3. 或使用瀏覽器的截圖工具！\n\n完整功能需要 html2canvas 函式庫。');
+        }
+        
+        // 打地鼠遊戲
+        let gameActive = false;
+        let score = 0;
+        let gameTimer;
+        let spawnTimer;
+        
+        function startGame() {
+            if (gameActive) return;
+            
+            gameActive = true;
+            score = 0;
+            let timeLeft = 30;
+            
+            document.getElementById('gameScore').style.display = 'block';
+            document.getElementById('score').textContent = score;
+            document.getElementById('timer').textContent = timeLeft;
+            
+            // 倒數計時
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+            
+            // 產生目標
+            spawnTarget();
+        }
+        
+        function spawnTarget() {
+            if (!gameActive) return;
+            
+            const target = document.createElement('div');
+            target.className = 'game-target';
+            target.textContent = '🎯';
+            target.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+            target.style.top = Math.random() * (window.innerHeight - 50) + 'px';
+            
+            target.onclick = () => {
+                score++;
+                document.getElementById('score').textContent = score;
+                target.remove();
+                spawnTarget();
+            };
+            
+            document.body.appendChild(target);
+            
+            // 1.5秒後自動消失
+            setTimeout(() => {
+                if (target.parentNode) {
+                    target.remove();
+                    spawnTarget();
+                }
+            }, 1500);
+        }
+        
+        function endGame() {
+            gameActive = false;
+            clearInterval(gameTimer);
+            document.getElementById('gameScore').style.display = 'none';
+            
+            // 移除所有目標
+            document.querySelectorAll('.game-target').forEach(t => t.remove());
+            
+            alert('遊戲結束！\n你的分數: ' + score + ' 分\n\n' + 
+                  (score >= 20 ? '太棒了！🏆' : score >= 10 ? '不錯喔！👍' : '再接再厲！💪'));
+        }
+        
         /* 定義改變背景顏色和文字顏色的函數 */
         function changeColor() {
             var newColor = "#"+((1<<24)*Math.random()|0).toString(16);
@@ -75,16 +629,19 @@
             document.getElementById("myText").style.color = newTextColor;
             document.getElementById("myText").style.fontSize = Math.floor(Math.random() * 50) + 20 + "px";
         }
+        
         /* 定義改變標題文字的函數 */
         function changeText() {
             var newText = ["歡迎來到我的網頁！", "你好，世界！", "這是一個美好的一天！", "希望你有個好心情！"];
             document.getElementById("myText").innerText = newText[Math.floor(Math.random() * newText.length)];
         }
+        
         /* 定義改變頁面語言的函數 */
         function changeLanguage() {
             var newLanguage = ["歡迎來到我的網頁！", "Welcome to my website!", "¡Bienvenido a mi sitio web!", "Willkommen auf meiner Website!"];
             document.getElementById("myText").innerText = newLanguage[Math.floor(Math.random() * newLanguage.length)];
         }
+        
         /* 定義播放和暫停音樂的函數 */
         function toggleMusic() {
             var myAudio = document.getElementById("myAudio");
@@ -94,17 +651,20 @@
                 myAudio.pause();
             }
         }
+        
         /* 定義調整音量的函數 */
         function adjustVolume() {
             var myAudio = document.getElementById("myAudio");
             var volumeSlider = document.getElementById("volumeSlider");
             myAudio.volume = volumeSlider.value;
         }
+        
         /* 定義改變字體的函數 */
         function changeFont() {
             var newFont = ["Arial", "Verdana", "Helvetica", "Tahoma", "Trebuchet MS", "Times New Roman", "Georgia", "Garamond", "Courier New", "Brush Script MT"];
             document.body.style.fontFamily = newFont[Math.floor(Math.random() * newFont.length)];
         }
+        
         /* 定義顯示日期和時間的函數 */
         function showDateTime() {
             var currentdate = new Date(); 
@@ -116,6 +676,56 @@
                 + currentdate.getSeconds();
             alert(datetime);
         }
+    </script>
+    
+    <!-- tsparticles 函式庫 -->
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-slim@2.12.0/tsparticles.slim.bundle.min.js"></script>
+    
+    <!-- tsparticles 星空初始化 -->
+    <script>
+        tsParticles.load("tsparticles", {
+            background: {
+                color: {
+                    value: "transparent"
+                }
+            },
+            fpsLimit: 60,
+            interactivity: {
+                enable: false
+            },
+            particles: {
+                color: {
+                    value: "#ffffff"
+                },
+                links: {
+                    enable: false
+                },
+                move: {
+                    direction: "none",
+                    enable: true,
+                    outModes: "out",
+                    random: true,
+                    speed: 0.2,
+                    straight: false
+                },
+                number: {
+                    density: {
+                        enable: true
+                    },
+                    value: 200
+                },
+                opacity: {
+                    value: { min: 0.3, max: 0.8 }
+                },
+                shape: {
+                    type: "circle"
+                },
+                size: {
+                    value: { min: 0.5, max: 2 }
+                }
+            },
+            detectRetina: true
+        });
     </script>
 </body>
 </html>
